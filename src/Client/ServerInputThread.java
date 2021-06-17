@@ -5,11 +5,15 @@ import GUI.ChatFrame;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import java.awt.*;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -33,31 +37,75 @@ public class ServerInputThread extends Thread {
     }
 
     public void run() {
-        String receivedMsg;
+        //styling username in chat
+        SimpleAttributeSet keyWord = new SimpleAttributeSet();
+        StyleConstants.setForeground(keyWord, new Color(69,229, 33));
+        StyleConstants.setBackground(keyWord, Color.YELLOW);
+        StyleConstants.setBold(keyWord, true);
+
         while(true) {
             try {
-                receivedMsg = dis.readUTF();
-                String[] arrOfData = receivedMsg.split("@", 2);
-                if(listPopChats.containsKey(arrOfData[0])) {
-                    ChatFrame updateFrame = listPopChats.get(arrOfData[0]);
-                    if (updateFrame == null) {
-                        ChatFrame newChat = new ChatFrame(username, s, arrOfData[0], listPopChats, model);
+                String signal = dis.readUTF();
+                String[] dataAndSender = signal.split("@", 2);
+                int count = dis.readInt();
+                byte[] receivedMsg = new byte[count];
+                dis.readFully(receivedMsg);
+                if(dataAndSender[0].equals("String")) {
+                    String messageInStr = new String(receivedMsg, StandardCharsets.UTF_8);
+                    if (listPopChats.containsKey(dataAndSender[1])) {
+                        ChatFrame updateFrame = listPopChats.get(dataAndSender[1]);
+                        if (updateFrame == null) {
+                            ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                            newChat.setVisible(true);
+                            StyledDocument doc = newChat.getMainChat().getStyledDocument();
+                            doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                            doc.insertString(doc.getLength(), messageInStr + "\n", null);
+                            listPopChats.replace(dataAndSender[1], newChat);
+                        } else {
+                            StyledDocument doc = updateFrame.getMainChat().getStyledDocument();
+                            doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                            doc.insertString(doc.getLength(), messageInStr + "\n", null);
+                        }
+                    } else {
+                        ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
                         newChat.setVisible(true);
                         StyledDocument doc = newChat.getMainChat().getStyledDocument();
-                        doc.insertString(doc.getLength(), arrOfData[0] + "\n" + arrOfData[1] + "\n", null);
-                        listPopChats.replace(arrOfData[0], newChat);
-                    } else {
-                        StyledDocument doc = updateFrame.getMainChat().getStyledDocument();
-                        doc.insertString(doc.getLength(), arrOfData[0] + "\n" + arrOfData[1] + "\n", null);
+                        doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                        doc.insertString(doc.getLength(), messageInStr + "\n", null);
+                        listPopChats.put(dataAndSender[1], newChat);
                     }
-                } else {
-                    ChatFrame newChat = new ChatFrame(username, s, arrOfData[0], listPopChats, model);
-                    newChat.setVisible(true);
-                    StyledDocument doc = newChat.getMainChat().getStyledDocument();
-                    doc.insertString(doc.getLength(), arrOfData[0] + "\n" + arrOfData[1] + "\n", null);
-                    listPopChats.put(arrOfData[0], newChat);
                 }
-                System.out.println(receivedMsg);
+                if (dataAndSender[0].equals("Image")) {
+                    ImageIcon imgIcon = new ImageIcon(receivedMsg);
+                    SimpleAttributeSet style = new SimpleAttributeSet();
+                    StyleConstants.setIcon(style, imgIcon);
+                    if (listPopChats.containsKey(dataAndSender[1])) {
+                        ChatFrame updateFrame = listPopChats.get(dataAndSender[1]);
+                        if (updateFrame == null) {
+                            ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                            newChat.setVisible(true);
+                            StyledDocument doc = newChat.getMainChat().getStyledDocument();
+                            doc.insertString(doc.getLength(),dataAndSender[1] + "\n", keyWord);
+                            doc.insertString(doc.getLength(), "test", style);
+                            doc.insertString(doc.getLength(),"\n", null);
+                            listPopChats.replace(dataAndSender[1], newChat);
+                        } else {
+                            StyledDocument doc = updateFrame.getMainChat().getStyledDocument();
+                            doc.insertString(doc.getLength(),dataAndSender[1] + "\n", keyWord);
+                            doc.insertString(doc.getLength(), "test", style);
+                            doc.insertString(doc.getLength(),"\n", null);
+                        }
+                    } else {
+                        ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                        newChat.setVisible(true);
+                        StyledDocument doc = newChat.getMainChat().getStyledDocument();
+                        doc.insertString(doc.getLength(),dataAndSender[1] + "\n", keyWord);
+                        doc.insertString(doc.getLength(), "test", style);
+                        doc.insertString(doc.getLength(),"\n", null);
+                        listPopChats.put(dataAndSender[1], newChat);
+                    }
+                }
+
             } catch (IOException | BadLocationException e) {
                 e.printStackTrace();
             }

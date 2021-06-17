@@ -7,10 +7,10 @@ import java.net.Socket;
 public class ServerOutputThread extends Thread {
     final DataOutputStream dos;
     final Socket s;
-    final String sendingMsg;
+    final byte[] sendingMsg;
     final String typeOfData;
 
-    public ServerOutputThread(Socket s, DataOutputStream dos, String sendingMsg, String typeOfData) {
+    public ServerOutputThread(Socket s, DataOutputStream dos, byte[] sendingMsg, String typeOfData) {
         this.dos = dos;
         this.s = s;
         this.sendingMsg = sendingMsg;
@@ -20,7 +20,11 @@ public class ServerOutputThread extends Thread {
     public void run() {
         try {
             dos.writeUTF(typeOfData);
-            dos.writeUTF(sendingMsg);
+            dos.writeInt(sendingMsg.length);
+            dos.write(sendingMsg);
+            dos.flush();
+            System.out.println(sendingMsg.length);
+            System.out.println(sendingMsg);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -30,7 +30,6 @@ public class Client {
                 String[] arrOfUsers = listUserString.split("-", -2);
                 for (int i = 1; i < arrOfUsers.length;i++) {
                     activeUsers.add(arrOfUsers[i]);
-                    System.out.println(arrOfUsers[i] + ",");
                 }
             } catch (ConnectException ce) {
                 ce.printStackTrace();
