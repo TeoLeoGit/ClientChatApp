@@ -22,9 +22,6 @@ public class ServerOutputThread extends Thread {
             dos.writeUTF(typeOfData);
             dos.writeInt(sendingMsg.length);
             dos.write(sendingMsg);
-            dos.flush();
-            System.out.println(sendingMsg.length);
-            System.out.println(sendingMsg);
         } catch (IOException e) {
             e.printStackTrace();
         }

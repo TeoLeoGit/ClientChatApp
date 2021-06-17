@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 
 public class ChatFrame extends JFrame {
@@ -232,12 +233,13 @@ public class ChatFrame extends JFrame {
         emojiBar.add(pgBtn); emojiBar.add(sadBtn);
 
         sendTextBtn.setBounds(490, 470, 115, 35);
-
+        sendTextBtn.setBackground(Color.WHITE);
         sendFileBtn.setBounds(610, 375, 255, 40);
-
+        sendFileBtn.setBackground(Color.WHITE);
         voiceChatBtn.setBounds(610, 420, 255, 40);
-
+        voiceChatBtn.setBackground(Color.WHITE);
         cameraChatBtn.setBounds(610, 465, 255, 40);
+        cameraChatBtn.setBackground(Color.WHITE);
 
         mainPanel.add(mainChatScroll); mainPanel.add(textScroll); mainPanel.add(emojiBar);
         mainPanel.add(sendTextBtn); mainPanel.add(voiceChatBtn);
@@ -248,7 +250,6 @@ public class ChatFrame extends JFrame {
         setSize(900, 550);
         setPreferredSize(new Dimension(900, 530));
         setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
-        //setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //event handle
         if (!listActiveChats.containsKey(client2Name)) {
@@ -269,6 +270,39 @@ public class ChatFrame extends JFrame {
                     senderText.setText("");
                 } catch (BadLocationException | IOException badLocationException) {
                     badLocationException.printStackTrace();
+                }
+            }
+        });
+        //sending File
+        sendFileBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                //Tham khao cach mo file tai stackoverflow
+                JFileChooser chooser = new JFileChooser();
+                int option = chooser.showOpenDialog(sendFileBtn);
+                if (option == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = chooser.getSelectedFile();
+                    String path = selectedFile.getAbsolutePath();
+                    try {
+                        System.out.println(path);
+                        String[] fileName = path.split("\\\\", -2);
+                        doc.insertString(doc.getLength(), "You:\n", keyWord);
+                        mainChat.setCaretPosition(mainChat.getDocument().getLength());
+                        JButton downloadBtn = new JButton(fileName[fileName.length - 1]);
+                        downloadBtn.setPreferredSize(new Dimension(100, 20));
+                        downloadBtn.setBackground(Color.WHITE);
+                        mainChat.insertComponent(downloadBtn);
+                        doc.insertString(doc.getLength(), "\n", null);
+
+                        //sending file
+                        File file = new File(path);
+                        byte[] fileContent = Files.readAllBytes(file.toPath());
+                        DataOutputStream dos = new DataOutputStream(clientSocket.getOutputStream());
+                        Thread outThread = new ServerOutputThread(clientSocket, dos, fileContent,
+                                "File>" + fileName[fileName.length - 1] + "-" + client2Name + "@" + username);
+                        outThread.start();
+                    } catch (BadLocationException | IOException badLocationException) {
+                        badLocationException.printStackTrace();
+                    }
                 }
             }
         });

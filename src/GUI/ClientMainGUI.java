@@ -27,7 +27,7 @@ public class ClientMainGUI extends JFrame {
         this.setTitle(username);
 
         JLabel serverInfo = new JLabel("Chose a server to connect");
-        serverInfo.setBounds(10, 245, 200, 25);
+        serverInfo.setBounds(10, 245, 240, 25);
         JButton addServerBtn = new JButton("Add server");
         addServerBtn.setBackground(new Color(69,229, 33));
         addServerBtn.setForeground(Color.WHITE);
