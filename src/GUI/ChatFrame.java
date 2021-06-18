@@ -5,6 +5,7 @@ import Client.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -12,17 +13,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ChatFrame extends JFrame {
-    public JTextPane mainChat;
+    private JTextPane mainChat;
     public ChatFrame(String username, Socket clientSocket, String client2Name, HashMap<String,
             ChatFrame> listActiveChats, DefaultTableModel model) throws IOException {
         setTitle(client2Name);
@@ -83,7 +82,7 @@ public class ChatFrame extends JFrame {
             pgBtn.setIcon(new ImageIcon(pgImg));
             sadBtn.setIcon(new ImageIcon(sadImg));
 
-            //event when chose an emoji
+            //events when chose an emoji
             Image finalPgImg = pgImg;
             Image finalLikeImg = likeImg;
             Image finalLoveImg = loveImg;
@@ -276,7 +275,7 @@ public class ChatFrame extends JFrame {
         //sending File
         sendFileBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                //Tham khao cach mo file tai stackoverflow
+                //Tham khao cach su dung JFileChooser tai stackoverflow
                 JFileChooser chooser = new JFileChooser();
                 int option = chooser.showOpenDialog(sendFileBtn);
                 if (option == JFileChooser.APPROVE_OPTION) {
@@ -306,7 +305,7 @@ public class ChatFrame extends JFrame {
                 }
             }
         });
-
+        
         //closing chat
         addWindowListener(new WindowAdapter() {
             @Override

@@ -1,6 +1,5 @@
 package Client;
 
-import javax.swing.text.StyledDocument;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
@@ -44,6 +43,7 @@ public class Client {
     public ArrayList<String> getActivateUsers() {
         return this.activeUsers;
     }
+    public String getUsername() {return username;}
 }
 
 

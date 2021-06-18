@@ -50,101 +50,111 @@ public class ServerInputThread extends Thread {
         while(true) {
             try {
                 String signal = dis.readUTF();
-                String[] dataAndSender = signal.split("@", 2);
                 int count = dis.readInt();
                 byte[] receivedMsg = new byte[count];
                 dis.readFully(receivedMsg);
-                if(dataAndSender[0].equals("String")) {
+
+
+                String[] data = signal.split("@", 2);
+                String[] arrayOfUsernames = data[1].split("=>", 2);
+                String chatName = data[1];
+                String sender = data[1];
+                if (arrayOfUsernames.length > 1) {
+                    chatName = arrayOfUsernames[1];
+                    sender = arrayOfUsernames[0];
+                }
+                System.out.println(chatName + ".");
+                if(data[0].equals("String")) {
                     String messageInStr = new String(receivedMsg, StandardCharsets.UTF_8);
-                    if (listPopChats.containsKey(dataAndSender[1])) {
-                        ChatFrame updateFrame = listPopChats.get(dataAndSender[1]);
+                    if (listPopChats.containsKey(chatName)) {
+                        ChatFrame updateFrame = listPopChats.get(chatName);
                         if (updateFrame == null) {
-                            ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                            ChatFrame newChat = new ChatFrame(username, s, sender, listPopChats, model);
                             newChat.setVisible(true);
                             StyledDocument doc = newChat.getMainChat().getStyledDocument();
-                            doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                            doc.insertString(doc.getLength(),sender + ":\n", keyWord);
                             doc.insertString(doc.getLength(), messageInStr + "\n", null);
-                            listPopChats.replace(dataAndSender[1], newChat);
+                            listPopChats.replace(chatName, newChat);
                         } else {
                             StyledDocument doc = updateFrame.getMainChat().getStyledDocument();
-                            doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                            doc.insertString(doc.getLength(),sender + ":\n", keyWord);
                             doc.insertString(doc.getLength(), messageInStr + "\n", null);
                         }
                     } else {
-                        ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                        ChatFrame newChat = new ChatFrame(username, s, chatName, listPopChats, model);
                         newChat.setVisible(true);
                         StyledDocument doc = newChat.getMainChat().getStyledDocument();
-                        doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                        doc.insertString(doc.getLength(),sender + ":\n", keyWord);
                         doc.insertString(doc.getLength(), messageInStr + "\n", null);
-                        listPopChats.put(dataAndSender[1], newChat);
+                        listPopChats.put(chatName, newChat);
                     }
                 }
-                if (dataAndSender[0].equals("Image")) {
+                if (data[0].equals("Image")) {
                     ImageIcon imgIcon = new ImageIcon(receivedMsg);
                     SimpleAttributeSet style = new SimpleAttributeSet();
                     StyleConstants.setIcon(style, imgIcon);
-                    if (listPopChats.containsKey(dataAndSender[1])) {
-                        ChatFrame updateFrame = listPopChats.get(dataAndSender[1]);
+                    if (listPopChats.containsKey(chatName)) {
+                        ChatFrame updateFrame = listPopChats.get(chatName);
                         if (updateFrame == null) {
-                            ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                            ChatFrame newChat = new ChatFrame(username, s, chatName, listPopChats, model);
                             newChat.setVisible(true);
                             StyledDocument doc = newChat.getMainChat().getStyledDocument();
-                            doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                            doc.insertString(doc.getLength(),sender + ":\n", keyWord);
                             doc.insertString(doc.getLength(), "test", style);
                             doc.insertString(doc.getLength(),"\n", null);
-                            listPopChats.replace(dataAndSender[1], newChat);
+                            listPopChats.replace(chatName, newChat);
                         } else {
                             StyledDocument doc = updateFrame.getMainChat().getStyledDocument();
-                            doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                            doc.insertString(doc.getLength(),sender + ":\n", keyWord);
                             doc.insertString(doc.getLength(), "test", style);
                             doc.insertString(doc.getLength(),"\n", null);
                         }
                     } else {
-                        ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                        ChatFrame newChat = new ChatFrame(username, s, chatName, listPopChats, model);
                         newChat.setVisible(true);
                         StyledDocument doc = newChat.getMainChat().getStyledDocument();
-                        doc.insertString(doc.getLength(),dataAndSender[1] + ":\n", keyWord);
+                        doc.insertString(doc.getLength(),sender + ":\n", keyWord);
                         doc.insertString(doc.getLength(), "test", style);
                         doc.insertString(doc.getLength(),"\n", null);
-                        listPopChats.put(dataAndSender[1], newChat);
+                        listPopChats.put(chatName, newChat);
                     }
                 }
 
-                if (dataAndSender[0].contains("File")) {
-                    String[] fileName = dataAndSender[0].split(">", 2);
+                if (data[0].contains("File")) {
+                    String[] fileName = data[0].split(">", 2);
                     JButton downloadBtn = new JButton(fileName[1]);
                     downloadBtn.setPreferredSize(new Dimension(100, 20));
                     downloadBtn.setBackground(Color.WHITE);
-                    if (listPopChats.containsKey(dataAndSender[1])) {
-                        ChatFrame updateFrame = listPopChats.get(dataAndSender[1]);
+                    if (listPopChats.containsKey(chatName)) {
+                        ChatFrame updateFrame = listPopChats.get(chatName);
                         if (updateFrame == null) {
-                            ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                            ChatFrame newChat = new ChatFrame(username, s, chatName, listPopChats, model);
                             newChat.setVisible(true);
                             StyledDocument doc = newChat.getMainChat().getStyledDocument();
                             JTextPane mainChat = newChat.getMainChat();
-                            doc.insertString(doc.getLength(), dataAndSender[1] + ":\n", keyWord);
+                            doc.insertString(doc.getLength(), sender + ":\n", keyWord);
                             mainChat.setCaretPosition(mainChat.getDocument().getLength());
                             mainChat.insertComponent(downloadBtn);
                             doc.insertString(doc.getLength(), "\n", null);
-                            listPopChats.replace(dataAndSender[1], newChat);
+                            listPopChats.replace(chatName, newChat);
                         } else {
                             StyledDocument doc = updateFrame.getMainChat().getStyledDocument();
                             JTextPane mainChat = updateFrame.getMainChat();
-                            doc.insertString(doc.getLength(), dataAndSender[1] + ":\n", keyWord);
+                            doc.insertString(doc.getLength(), sender + ":\n", keyWord);
                             mainChat.setCaretPosition(mainChat.getDocument().getLength());
                             mainChat.insertComponent(downloadBtn);
                             doc.insertString(doc.getLength(), "\n", null);
                         }
                     } else {
-                        ChatFrame newChat = new ChatFrame(username, s, dataAndSender[1], listPopChats, model);
+                        ChatFrame newChat = new ChatFrame(username, s, chatName, listPopChats, model);
                         newChat.setVisible(true);
                         StyledDocument doc = newChat.getMainChat().getStyledDocument();
                         JTextPane mainChat = newChat.getMainChat();
-                        doc.insertString(doc.getLength(), dataAndSender[1] + ":\n", keyWord);
+                        doc.insertString(doc.getLength(), sender + ":\n", keyWord);
                         mainChat.setCaretPosition(mainChat.getDocument().getLength());
                         mainChat.insertComponent(downloadBtn);
                         doc.insertString(doc.getLength(), "\n", null);
-                        listPopChats.put(dataAndSender[1], newChat);
+                        listPopChats.put(chatName, newChat);
                     }
                     downloadBtn.addActionListener(new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
