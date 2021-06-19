@@ -19,10 +19,11 @@ public class Client {
                 DataInputStream dis = new DataInputStream(s.getInputStream());
                 DataOutputStream dos = new DataOutputStream(s.getOutputStream());
 
-                //receiving active users list
-                String listUserString = dis.readUTF();
                 //sending username to server
                 dos.writeUTF(username);
+                //receiving active users list
+                String listUserString = dis.readUTF();
+                ;
 
                 //receiving list user
                 activeUsers = new ArrayList<String>();

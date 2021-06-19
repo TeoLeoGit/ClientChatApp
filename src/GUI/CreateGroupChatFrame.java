@@ -76,7 +76,12 @@ public class CreateGroupChatFrame extends JFrame {
                     newChatName[0] = newChatName[0] + ", " + addingUser;
 
                     DefaultTableModel model = (DefaultTableModel) userTable.getModel();
-                    model.removeRow(modelIndex);
+                    if(modelIndex == model.getRowCount() - 1 && model.getRowCount() > 1) {
+                        JOptionPane.showMessageDialog(inviteCell.getBtn(), "Adding last user will cause a bug" +
+                                " that we haven't fixed yet so we move it on top and u can delete it :D");
+                        model.moveRow(modelIndex, modelIndex, 0);
+                    } else
+                        model.removeRow(modelIndex);
                 }
             }
         });

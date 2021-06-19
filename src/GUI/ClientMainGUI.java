@@ -1,6 +1,6 @@
 package GUI;
 
-import Client.Client;
+import Client.*;
 import Client.ServerInputThread;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -9,9 +9,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class ClientMainGUI extends JFrame {
     private JPanel serverPanel;
@@ -40,9 +43,10 @@ public class ClientMainGUI extends JFrame {
                 return column != 0;
             }
         };
-
+        final int[] numberOfServer = {1};
         model.addRow(new Object[]{"3500", "Edit", "Remove" , "Connect"});
         JTable serverTable = new JTable(model);
+
         ButtonEditor connCell = new ButtonEditor(new JTextField());
         ButtonRenderer connBtn = new ButtonRenderer();
         ButtonEditor editCell = new ButtonEditor(new JTextField());
@@ -122,6 +126,7 @@ public class ClientMainGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 JFrame addServerFrame = new AddServerFrame(model);
                 addServerFrame.setVisible(true);
+                numberOfServer[0]++;
             }
         });
         //remove server
@@ -131,7 +136,14 @@ public class ClientMainGUI extends JFrame {
                 if (index != -1) {
                     int modelIndex = serverTable.convertRowIndexToModel(index);
                     DefaultTableModel svModel = (DefaultTableModel) serverTable.getModel();
-                    svModel.removeRow(modelIndex);
+                    System.out.println(numberOfServer[0]);
+                    if(modelIndex == svModel.getRowCount() - 1 && svModel.getRowCount() > 1) {
+                        JOptionPane.showMessageDialog(removeCell.getBtn(), "Removing last row will cause a bug" +
+                                " that we haven't fixed yet so we move it on top and u can delete it :D");
+                        svModel.moveRow(modelIndex, modelIndex, 0);
+
+                    } else
+                        svModel.removeRow(modelIndex);
                 }
             }
         });
@@ -158,6 +170,7 @@ public class ClientMainGUI extends JFrame {
                         int oldPort = -1;
                         int firstConn = 0;
 
+                        System.out.println(serverTable.getValueAt(index, 0));
                         int connectPort = Integer.parseInt((serverTable.getValueAt(index, 0).toString()));
                         if (connectClient[0] == null || connectClient[0].getSocket() == null) {
                             connectClient[0] = new Client(username, connectPort);
@@ -165,22 +178,37 @@ public class ClientMainGUI extends JFrame {
                         }
                         else
                             oldPort = connectClient[0].getSocket().getPort();
-                        if (connectClient[0].getSocket() != null) {
+                        if (connectClient[0] != null && connectClient[0].getSocket() != null) {
+                            System.out.println(10);
                             if (oldPort != connectPort) {
-                                if (firstConn != 1)
+                                if (oldPort != -1) {
+                                    System.out.println(13);
+                                    String closingStr = username;
+                                    byte[] b = closingStr.getBytes(StandardCharsets.UTF_8);
+                                    DataOutputStream dos = new DataOutputStream(connectClient[0].getSocket().getOutputStream());
+                                    Thread outThread = new ServerOutputThread(connectClient[0].getSocket(), dos, b,
+                                            "Close-" + username);
+                                    outThread.start();
+                                }
+                                TimeUnit.SECONDS.sleep(1);
+                                if (firstConn != 1) {
                                     connectClient[0] = new Client(username, connectPort);
+                                }
+
                                 ArrayList<String> activeUsers = connectClient[0].getActivateUsers();
                                 DefaultTableModel activeUserTblModel = (DefaultTableModel) userTable.getModel();
                                 int rowCount = activeUserTblModel.getRowCount();
-                                //Remove rows one by one from the end of the table
+
                                 for (int i = 0; i < rowCount; i++) {
                                     activeUserTblModel.removeRow(i);
                                 }
                                 //adding new row
-                                for (String item : activeUsers) {
-                                    System.out.println(item);
-                                    activeUserTblModel.addRow(new Object[]{item, "Start chatting"});
+                                if (activeUsers != null)
+                                    for (String item : activeUsers) {
+                                        activeUserTblModel.addRow(new Object[]{item, "Start chatting"});
                                 }
+
+
                                 serverInfo.setText("Connected to server with port - " + connectPort);
 
                                 //start a thread to listen for change from server
@@ -194,7 +222,7 @@ public class ClientMainGUI extends JFrame {
                             else
                                 serverInfo.setText("Server is not responding");
                     }
-                    catch (NumberFormatException | IOException ex) {
+                    catch (NumberFormatException | IOException | InterruptedException ex) {
                         JOptionPane.showMessageDialog(connCell.getBtn(), "Number format exception");
                     }
                 }
@@ -223,7 +251,7 @@ public class ClientMainGUI extends JFrame {
             }
         });
 
-        //group chat handel
+        //group chat handle
         JButton groupChatBtn = new JButton("Create group chat");
         groupChatBtn.setBackground(Color.WHITE);
         groupChatBtn.setBounds(390, 315,200, 40);

@@ -46,15 +46,16 @@ public class ButtonEditor extends DefaultCellEditor {
         return new String(lbl);
     }
 
-    @Override
+    //@Override
     public boolean stopCellEditing() {
         isClicked = false;
 
         return super.stopCellEditing();
     }
 
-    @Override
+    //@Override
     protected void fireEditingStopped() {
         super.fireEditingStopped();
+
     }
 }

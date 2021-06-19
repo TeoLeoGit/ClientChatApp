@@ -40,15 +40,16 @@ public class AddServerFrame extends JFrame {
                     int rowCount = model.getRowCount();
                     int existed = 0;
                     String portStr = serverPortText.getText();
-                    for (int i = 0; i < rowCount; i++) {
+                    for (int i = 0; i < rowCount - 1; i++) {
                         if (model.getValueAt(i, 0).toString().equals(portStr)) {
                             existed = 1;
                             JOptionPane.showMessageDialog(addBtn, "Server port already existed");
                             break;
                         }
                     }
-                    if (existed == 0 && portNumber > 0)
+                    if (existed == 0 && portNumber > 0) {
                         model.addRow(new Object[]{serverPortText.getText(), "Edit", "Remove", "Connect"});
+                    }
                     dispose();
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(addBtn, "Illegal port format");
