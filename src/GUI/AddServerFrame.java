@@ -5,9 +5,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class AddServerFrame extends JFrame {
-    public AddServerFrame(DefaultTableModel model) {
+    public AddServerFrame(DefaultTableModel model, ArrayList<String> serverList) {
         JPanel mainPanel = new JPanel();
         JButton addBtn = new JButton("Add");
         mainPanel.setLayout(new FlowLayout());
@@ -30,7 +31,6 @@ public class AddServerFrame extends JFrame {
         this.setPreferredSize(new Dimension(380, 60));
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width / 2 - this.getSize().width / 2, dim.height / 2 - this.getSize().height / 2);
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         //event handle
         addBtn.addActionListener(new ActionListener() {
@@ -40,14 +40,12 @@ public class AddServerFrame extends JFrame {
                     int rowCount = model.getRowCount();
                     int existed = 0;
                     String portStr = serverPortText.getText();
-                    for (int i = 0; i < rowCount - 1; i++) {
-                        if (model.getValueAt(i, 0).toString().equals(portStr)) {
-                            existed = 1;
-                            JOptionPane.showMessageDialog(addBtn, "Server port already existed");
-                            break;
-                        }
+                    if (serverList.contains(portStr) || portNumber == 3500) {
+                        existed = 1;
+                        JOptionPane.showMessageDialog(addBtn, "Server port already existed or default");
                     }
                     if (existed == 0 && portNumber > 0) {
+                        serverList.add(serverPortText.getText());
                         model.addRow(new Object[]{serverPortText.getText(), "Edit", "Remove", "Connect"});
                     }
                     dispose();

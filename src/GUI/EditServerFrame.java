@@ -5,9 +5,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class EditServerFrame extends JFrame {
-    public EditServerFrame(DefaultTableModel model, int modelIndex) {
+    public EditServerFrame(DefaultTableModel model, int modelIndex, ArrayList<String> serverList) {
         JPanel mainPanel = new JPanel();
         JButton editBtn = new JButton("Edit");
         mainPanel.setLayout(new FlowLayout());
@@ -37,7 +38,14 @@ public class EditServerFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 try {
                     int portNumber = Integer.valueOf(serverPortText.getText());
-                    model.setValueAt(serverPortText.getText(), modelIndex, 0);
+                    String newPort = serverPortText.getText();
+                    if(serverList.contains(newPort) || portNumber == 3500)
+                        JOptionPane.showMessageDialog(editBtn, "Port already existed in list or default port");
+                    else {
+                        serverList.remove(model.getValueAt(modelIndex, 0));
+                        model.setValueAt(serverPortText.getText(), modelIndex, 0);
+                        serverList.add(newPort);
+                    }
                     dispose();
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(editBtn, "Illegal port format");

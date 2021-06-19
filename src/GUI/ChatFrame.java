@@ -5,23 +5,19 @@ import Client.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import javax.swing.text.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashMap;
 
-public class ChatFrame extends JFrame {
+public class ChatFrame extends JFrame implements KeyListener {
     private JTextPane mainChat;
+    private JComboBox sendChatModeCb;
     public ChatFrame(String username, Socket clientSocket, String client2Name, HashMap<String,
             ChatFrame> listActiveChats, DefaultTableModel model) throws IOException {
         setTitle(client2Name);
@@ -31,8 +27,8 @@ public class ChatFrame extends JFrame {
         JPanel emojiBar = new JPanel();
         JButton sendTextBtn = new JButton("Send");
         JButton sendFileBtn = new JButton("Send file");
-        JButton voiceChatBtn = new JButton("Voice chat");
-        JButton cameraChatBtn = new JButton("Camera chat");
+
+
 
         mainPanel.setLayout(null);
 
@@ -233,16 +229,13 @@ public class ChatFrame extends JFrame {
 
         sendTextBtn.setBounds(490, 470, 115, 35);
         sendTextBtn.setBackground(Color.WHITE);
-        sendFileBtn.setBounds(610, 375, 255, 40);
+        sendFileBtn.setBounds(610, 20, 255, 40);
         sendFileBtn.setBackground(Color.WHITE);
-        voiceChatBtn.setBounds(610, 420, 255, 40);
-        voiceChatBtn.setBackground(Color.WHITE);
-        cameraChatBtn.setBounds(610, 465, 255, 40);
-        cameraChatBtn.setBackground(Color.WHITE);
+
 
         mainPanel.add(mainChatScroll); mainPanel.add(textScroll); mainPanel.add(emojiBar);
-        mainPanel.add(sendTextBtn); mainPanel.add(voiceChatBtn);
-        mainPanel.add(sendFileBtn); mainPanel.add(cameraChatBtn);
+        mainPanel.add(sendTextBtn);
+        mainPanel.add(sendFileBtn);
 
         add(mainPanel);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -282,7 +275,6 @@ public class ChatFrame extends JFrame {
                     File selectedFile = chooser.getSelectedFile();
                     String path = selectedFile.getAbsolutePath();
                     try {
-                        System.out.println(path);
                         String[] fileName = path.split("\\\\", -2);
                         doc.insertString(doc.getLength(), "You:\n", keyWord);
                         mainChat.setCaretPosition(mainChat.getDocument().getLength());
@@ -305,7 +297,10 @@ public class ChatFrame extends JFrame {
                 }
             }
         });
-        
+
+        //listen to enter key to send chat
+        getRootPane().setDefaultButton(sendTextBtn);
+
         //closing chat
         addWindowListener(new WindowAdapter() {
             @Override
@@ -335,5 +330,20 @@ public class ChatFrame extends JFrame {
         bGr.dispose();
         // Return the buffered image
         return bimage;
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
     }
 }

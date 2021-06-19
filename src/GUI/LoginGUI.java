@@ -1,18 +1,23 @@
 package GUI;
 
+import Client.Client;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.*;
-import java.util.List;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class LoginGUI extends JFrame {
     private JPanel mainPanel;
     private JButton loginBtn;
+    private JButton registBtn;
     public LoginGUI() {
         mainPanel = new JPanel();
         loginBtn = new JButton("Login");
+        registBtn = new JButton("Sign up");
         mainPanel .setLayout(null);
 
         //panel ministry setting
@@ -24,13 +29,16 @@ public class LoginGUI extends JFrame {
         usernameText.setBounds(80, 20, 165, 25);
         JTextField passwordText = new JTextField();
         passwordText.setBounds(80, 50, 165, 25);
-        loginBtn.setBounds(260, 30, 80, 30);
+        loginBtn.setBounds(260, 20, 80, 25);
+        registBtn.setBounds(260, 50, 80, 25);
         mainPanel.add(usernameLabel);
         mainPanel.add(passwordLabel);
         mainPanel.add(usernameText);
         mainPanel.add(passwordText);
         mainPanel.add(loginBtn);
+        mainPanel.add(registBtn);
         loginBtn.setBackground(Color.WHITE);
+        registBtn.setBackground(Color.WHITE);
         add(mainPanel);
 
         //panel student setting
@@ -43,26 +51,74 @@ public class LoginGUI extends JFrame {
         //event handle
         loginBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                try {
-                    Class.forName("com.mysql.cj.jdbc.Driver");
-                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/chatappuser", "root", "teo15102000");
-                    String query = "select username from accounts where username='" + usernameText.getText() +
-                            "' and password= '" + passwordText.getText() + "';";
-                    Statement stmt = conn.createStatement();
-                    ResultSet rs = stmt.executeQuery(query);
-                    if(rs.next()) {
-                        JFrame clientGUI = new ClientMainGUI(usernameText.getText());
-                        clientGUI.setVisible(true);
-                        dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(loginBtn, "No account found");
+                //Login : Login>username##password
+                String username = usernameText.getText();
+                String password = passwordText.getText();
+                if (username.equals("") || password.equals(""))
+                    JOptionPane.showMessageDialog(loginBtn, "Username or password not given");
+                else
+                    if (username.contains("@") || username.contains("=>") || username.contains(", ")
+                            || username.contains("##") || username.contains(">"))
+                        JOptionPane.showMessageDialog(loginBtn, "Username cannot contains '@', '>', '=>', ', ', '##' characters");
+                    else {
+                        String userSignature = "Login>" + username + "##" + password;
+                        System.out.println(userSignature);
+                        //by default will connect to server 3500
+                        Client loginCl = new Client(userSignature, 3500);
+                        try {
+                            TimeUnit.SECONDS.sleep(1);
+                        } catch (InterruptedException interruptedException) {
+                            interruptedException.printStackTrace();
+                        }
+                        if (loginCl.getSocket() == null)
+                            JOptionPane.showMessageDialog(loginBtn, "Server is not responding");
+                        else {
+                            if(loginCl.getSocket().isClosed())
+                                JOptionPane.showMessageDialog(loginBtn, "Login failed");
+                            else {
+                                System.out.println("OK1");
+                                JFrame clientGUI = null;
+                                try {
+                                    clientGUI = new ClientMainGUI(loginCl);
+                                } catch (IOException exception) {
+                                    exception.printStackTrace();
+                                }
+                                clientGUI.setVisible(true);
+                                dispose();
+                            }
+                        }
                     }
-                    stmt.close();
+            }
+        });
 
-                } catch (ClassNotFoundException | SQLException classNotFoundException) {
-                    classNotFoundException.printStackTrace();
+        registBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                //Login : Register>username##password
+                String username = usernameText.getText();
+                String password = passwordText.getText();
+                if (username.equals("") || password.equals(""))
+                    JOptionPane.showMessageDialog(loginBtn, "Username or password not given");
+                else
+                if (username.contains("@") || username.contains("=>") || username.contains(", ")
+                        || username.contains("##") || username.contains(">"))
+                    JOptionPane.showMessageDialog(loginBtn, "Username cannot contains '@', '>', '=>', ', ', '##' characters");
+                else {
+                    String userSignature = "Register>" + usernameText.getText() + "##" + passwordText.getText();
+                    System.out.println(userSignature);
+                    //by default will connect to server 3500
+                    Client loginCl = new Client(userSignature, 3500);
+                    if (loginCl.getSocket() == null)
+                        JOptionPane.showMessageDialog(loginBtn, "Server is not responding");
+                    else {
+                        try {
+                            TimeUnit.SECONDS.sleep(1);
+                        } catch (InterruptedException interruptedException) {
+                            interruptedException.printStackTrace();
+                        }
+                        if(loginCl.getSocket().isClosed())
+                            JOptionPane.showMessageDialog(loginBtn, "You can try log in now");
+                    }
                 }
-
             }
         });
     }

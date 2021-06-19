@@ -55,7 +55,6 @@ public class ServerInputThread extends Thread {
                 dis.readFully(receivedMsg);
 
                 String[] data = signal.split("@", 2);
-                System.out.println(data[0]);
                 if (data[0].equals("OKClose")) {
                     System.out.println(data[0]);
                     dis.close();
